@@ -1,41 +1,64 @@
+version: '3.8'
+
 services:
   search-webscraper-markdown:
     build:
       context: .
-      dockerfile: Dockerfile  # This refers to your Python FastAPI Dockerfile
+      dockerfile: Dockerfile
     container_name: search-webscraper-markdown
     ports:
       - "8000:8000"
     depends_on:
       - searxng
       - browserless
+      - ollama
     volumes:
-      - .:/app 
-    
+      - .:/app
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OLLAMA_HOST=ollama:11434
+      - SEARXNG_URL=http://searxng:8080
+      - BROWSERLESS_URL=http://browserless:3000
+      - TOKEN=${TOKEN:-}
+
   searxng:
     container_name: searxng
     image: docker.io/searxng/searxng:latest
     restart: unless-stopped
-    networks:
-      - default
     ports:
       - "8080:8080"
     volumes:
       - ./searxng:/etc/searxng:rw
+    networks:
+      - default
 
   browserless:
     container_name: browserless
     image: ghcr.io/browserless/chromium
     restart: unless-stopped
-    networks:
-      - default
     ports:
       - "3000:3000"
     environment:
-      - TOKEN=your_browserless_token_here  # Replace with your actual token
+      - TOKEN=${TOKEN:-}
       - MAX_CONCURRENT_SESSIONS=10
       - TIMEOUT=60000
       - QUEUED=10
+    networks:
+      - default
+
+  ollama:
+    container_name: ollama
+    image: ollama/ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - default
+
+volumes:
+  ollama_data:
 
 networks:
   default:

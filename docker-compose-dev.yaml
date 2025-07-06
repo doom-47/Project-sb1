@@ -32,7 +32,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - TOKEN=your_browserless_token_here  # Replace with your actual token
+     # - TOKEN=your_browserless_token_here  # Replace with your actual token
       - MAX_CONCURRENT_SESSIONS=10
       - TIMEOUT=60000
       - QUEUED=10
